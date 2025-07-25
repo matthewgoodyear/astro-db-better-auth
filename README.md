@@ -3,9 +3,46 @@
 > [!WARNING]  
 > This repo and the instructions below are currently in progress.
 
-Example of how to implement AstroDB, Turso, and Better Auth.
+A simple project created with **Astro**, **Astro DB** and **Better Auth**, connected to a **Turso Database**.
 
 This took me a bit of time to figure out, so I thought the instructions could be useful.
+
+---
+
+## Getting started
+
+Follow these steps to set up and run the application locally:
+
+1. **Clone the Repository**
+
+```sh
+git clone https://github.com/matthewgoodyear/astro-db-better-auth
+cd astro-todoapp
+```
+
+2. **Install Dependencies**
+
+```sh
+npm install
+```
+
+3. **Create Environment Variables**
+
+```sh
+ASTRO_DB_REMOTE_URL=libsql://insert-your-url-here.turso.io
+ASTRO_DB_APP_TOKEN=insert-your-token-here
+
+BETTER_AUTH_SECRET=your-better-auth-token
+BETTER_AUTH_URL=http://localhost:4321
+```
+
+4. **Start Dev Server**
+
+```sh
+npm run dev
+```
+
+---
 
 ## Step by step guide
 
