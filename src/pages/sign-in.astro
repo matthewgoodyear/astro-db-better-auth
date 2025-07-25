@@ -1,0 +1,73 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+---
+
+<BaseLayout>
+  <div class="wrapper | space-y-8">
+    <h1 class="text-3xl font-bold">Sign in</h1>
+
+    <div id="error-container" class="alert-destructive hidden">
+      <h2>Something went wrong!</h2>
+      <section id="error-message"></section>
+    </div>
+
+    <form id="signin-form" class="space-y-4">
+      <input
+        class="input"
+        type="email"
+        name="email"
+        placeholder="Email"
+        value="test@email.com"
+        required
+      />
+      <input
+        class="input"
+        type="password"
+        name="password"
+        placeholder="Password"
+        value="password"
+        required
+      />
+      <button class="btn" type="submit">Sign in</button>
+    </form>
+
+    <p>
+      Don’t have an account?
+      <a href="/sign-up" class="ml-1 underline">Sign up here</a>.
+    </p>
+  </div>
+</BaseLayout>
+
+<script>
+  import { authClient } from "@/lib/auth-client";
+
+  const form = document.querySelector<HTMLFormElement>("#signin-form");
+  const errorContainer = document.querySelector(
+    "#error-container",
+  ) as HTMLElement;
+  const errorMessageEl = document.querySelector(
+    "#error-message",
+  ) as HTMLElement;
+
+  form?.addEventListener("submit", async (e: SubmitEvent) => {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    try {
+      const result = await authClient.signIn.email({ email, password });
+
+      if (!result.error) {
+        window.location.href = "/dashboard";
+      } else {
+        errorMessageEl.textContent =
+          result.error.message || "Invalid email or password.";
+        errorContainer.classList.remove("hidden");
+      }
+    } catch (error) {
+      console.error("Unexpected error during sign in:", error);
+    }
+  });
+</script>

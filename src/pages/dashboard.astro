@@ -1,0 +1,20 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { actions } from "astro:actions";
+
+if (!Astro.locals.session && !Astro.locals.user) {
+  return Astro.redirect("/sign-in");
+}
+
+const signOutResult = Astro.getActionResult(actions.signOut);
+
+if (signOutResult && !signOutResult.error) {
+  return Astro.redirect("/");
+}
+---
+
+<BaseLayout>
+  <div class="wrapper | space-y-8">
+    <h1 class="text-3xl font-bold">Hello, {Astro.locals?.user?.name}.</h1>
+  </div>
+</BaseLayout>

@@ -12,27 +12,39 @@ This was a bit of a nightmare to figure out but I got there in the end.
 ### Project set up
 
 Create Astro project
-`npm create astro@latest`
+
+```sh
+npm create astro@latest
+```
 
 Add Astro DB
-`npx astro add db`
+
+```sh
+npx astro add db
+```
 
 Install Tailwind & BasecoatUI (optional)
-`npx astro add tailwind`
-`npm install basecoat-css`
+
+```sh
+npx astro add tailwind
+npm install basecoat-css
+```
 
 ### Better Auth set up
 
 Install Better Auth
-`npm install better-auth`
+
+```sh
+npm install better-auth
+```
 
 #### Set environment variables
 
 Generate a secret key and set the base url.
 
 ```sh
-  BETTER_AUTH_SECRET=O814CrLNeZJn2FnRC8rTsUvQK0S77bui
-  BETTER_AUTH_URL=http://localhost:4321
+BETTER_AUTH_SECRET=O814CrLNeZJn2FnRC8rTsUvQK0S77bui
+BETTER_AUTH_URL=http://localhost:4321
 ```
 
 #### Create the schema
@@ -44,24 +56,24 @@ We then need to create the schema here to match the schema that Better Auth is e
 Create a file named `auth.ts` in the `lib/` folder. This is the bit that tripped me up for a while, but using the Drizzle Adapter and passing our database schema into this seemed to do the trick.
 
 ```sh
-  import { betterAuth } from "better-auth";
-  import { drizzleAdapter } from "better-auth/adapters/drizzle";
-  import { db, Account, Session, User, Verification } from "astro:db";
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { db, Account, Session, User, Verification } from "astro:db";
 
-  export const auth = betterAuth({
-    database: drizzleAdapter(db, {
-      provider: "sqlite",
-      schema: {
-        user: User,
-        session: Session,
-        account: Account,
-        verification: Verification,
-      },
-    }),
-    emailAndPassword: {
-      enabled: true,
+export const auth = betterAuth({
+  database: drizzleAdapter(db, {
+    provider: "sqlite",
+    schema: {
+      user: User,
+      session: Session,
+      account: Account,
+      verification: Verification,
     },
-  });
+  }),
+  emailAndPassword: {
+    enabled: true,
+  },
+});
 ```
 
 #### Mount the handler
@@ -69,12 +81,12 @@ Create a file named `auth.ts` in the `lib/` folder. This is the bit that tripped
 Create an API route here `pages/api/auth/[...all].ts`
 
 ```sh
-  import { auth } from "../../../lib/auth";
-  import type { APIRoute } from "astro";
+import { auth } from "../../../lib/auth";
+import type { APIRoute } from "astro";
 
-  export const ALL: APIRoute = async (ctx) => {
-    return auth.handler(ctx.request);
-  };
+export const ALL: APIRoute = async (ctx) => {
+  return auth.handler(ctx.request);
+};
 ```
 
 #### Create client instance
@@ -82,11 +94,11 @@ Create an API route here `pages/api/auth/[...all].ts`
 Create the auth client in `lib/auth-client.ts`
 
 ```sh
-  import { createAuthClient } from "better-auth/client";
+import { createAuthClient } from "better-auth/client";
 
-  export const authClient = createAuthClient({
-    baseURL: import.meta.env.BETTER_AUTH_URL,
-  });
+export const authClient = createAuthClient({
+  baseURL: import.meta.env.BETTER_AUTH_URL,
+});
 ```
 
 #### Types
@@ -94,14 +106,14 @@ Create the auth client in `lib/auth-client.ts`
 Set up type definitions for `user` and `session` objects in the `/src/env.d.ts` file.
 
 ```sh
-  /// <reference path="../.astro/types.d.ts" />
+/// <reference path="../.astro/types.d.ts" />
 
-  declare namespace App {
-    interface Locals {
-      user: import("better-auth").User | null;
-      session: import("better-auth").Session | null;
-    }
+declare namespace App {
+  interface Locals {
+    user: import("better-auth").User | null;
+    session: import("better-auth").Session | null;
   }
+}
 ```
 
 #### Middleware
@@ -109,21 +121,21 @@ Set up type definitions for `user` and `session` objects in the `/src/env.d.ts` 
 Create a file here `src/middleware/index.ts` with the following code:
 
 ```sh
-  import { auth } from "@/lib/auth";
-  import { defineMiddleware } from "astro:middleware";
+import { auth } from "@/lib/auth";
+import { defineMiddleware } from "astro:middleware";
 
-  export const onRequest = defineMiddleware(async (context, next) => {
-    context.locals.user = null;
-    context.locals.session = null;
-    const isAuthed = await auth.api.getSession({
-      headers: context.request.headers,
-    });
-    if (isAuthed) {
-      context.locals.user = isAuthed.user;
-      context.locals.session = isAuthed.session;
-    }
-    return next();
+export const onRequest = defineMiddleware(async (context, next) => {
+  context.locals.user = null;
+  context.locals.session = null;
+  const isAuthed = await auth.api.getSession({
+    headers: context.request.headers,
   });
+  if (isAuthed) {
+    context.locals.user = isAuthed.user;
+    context.locals.session = isAuthed.session;
+  }
+  return next();
+});
 ```
 
 ### Hosting the database on Turso
@@ -148,8 +160,8 @@ Create app token
 Populate the .env file with the info like so:
 
 ```sh
-  ASTRO_DB_REMOTE_URL=libsql://insert-your-url-here.turso.io
-  ASTRO_DB_APP_TOKEN=insert-your-token-here
+ASTRO_DB_REMOTE_URL=libsql://insert-your-url-here.turso.io
+ASTRO_DB_APP_TOKEN=insert-your-token-here
 ```
 
 Push the database _schema_ to Turso.
@@ -158,12 +170,12 @@ Push the database _schema_ to Turso.
 Update the build command and create a new dev command that's able to use the production database.
 
 ```sh
-  {
-    "scripts": {
-      "dev-remote": "astro dev --remote",
-      "build": "astro build --remote"
-    }
+{
+  "scripts": {
+    "dev-remote": "astro dev --remote",
+    "build": "astro build --remote"
   }
+}
 ```
 
 ## Conclusion

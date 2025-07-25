@@ -1,0 +1,66 @@
+---
+import { actions } from "astro:actions";
+
+const session = Astro.locals.session ? true : false;
+---
+
+<header class="border-b-1 py-4">
+  <div class="wrapper | flex items-center justify-between">
+    <nav>
+      <ul class="flex gap-4">
+        <li><a href="/">Home</a></li>
+        <li><a href="/dashboard/">Dashboard</a></li>
+      </ul>
+    </nav>
+
+    <div class="flex items-center gap-4">
+      {
+        session ? (
+          <>
+            <button id="sign-out" class="btn-secondary">
+              Sign out
+            </button>
+            <a href="/account">
+              <img
+                class="size-8 shrink-0 rounded-full object-cover"
+                alt="@hunvreus"
+                src="https://github.com/hunvreus.png"
+              />
+            </a>
+          </>
+        ) : (
+          <>
+            <a href="/sign-up" class="btn-secondary">
+              Sign up
+            </a>
+            <a href="/sign-in" class="btn">
+              Sign in
+            </a>
+          </>
+        )
+      }
+    </div>
+  </div>
+</header>
+
+<script>
+  import { authClient } from "@/lib/auth-client";
+
+  const signOutButton = document.querySelector<HTMLButtonElement>("#sign-out");
+
+  signOutButton?.addEventListener("click", async (e: MouseEvent) => {
+    e.preventDefault();
+
+    try {
+      const result = await authClient.signOut();
+
+      if (result.error) {
+        console.error("Sign out failed:", result.error.message);
+      } else {
+        window.location.href = "/";
+      }
+    } catch (error) {
+      console.error("Unexpected error during sign out:", error);
+    }
+  });
+</script>

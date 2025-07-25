@@ -1,0 +1,96 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { actions } from "astro:actions";
+
+if (!Astro.locals.session && !Astro.locals.user) {
+  return Astro.redirect("/sign-in");
+}
+
+const result = Astro.getActionResult(actions.updatePassword);
+
+const signOutResult = Astro.getActionResult(actions.signOut);
+
+if (signOutResult && !signOutResult.error) {
+  return Astro.redirect("/");
+}
+---
+
+<BaseLayout>
+  <div class="wrapper | space-y-8">
+    <h1 class="text-3xl font-bold">Account settings</h1>
+
+    {
+      result?.error && (
+        <div class="alert-destructive">
+          <h2>Something went wrong!</h2>
+          <section>{result.error.message}</section>
+        </div>
+      )
+    }
+
+    {
+      result?.data?.success && (
+        <div class="alert">
+          <h2>Success!</h2>
+          <section>{result.data?.message}</section>
+        </div>
+      )
+    }
+
+    <hr />
+
+    <div class="space-y-4">
+      <h2 class="text-xl font-bold">Profile</h2>
+      <form
+        id="update-account-form"
+        class="space-y-4"
+        method="POST"
+        action={actions.updateUser}
+      >
+        <input
+          class="input"
+          type="text"
+          name="name"
+          value={Astro.locals.user?.name}
+          required
+        />
+        <input
+          class="input"
+          type="email"
+          name="email"
+          value={Astro.locals.user?.email}
+          required
+        />
+        <button class="btn" type="submit">Update</button>
+      </form>
+    </div>
+
+    <hr />
+
+    <div class="space-y-4">
+      <h2 class="text-xl font-bold">Update password</h2>
+      <form
+        id="signup-form"
+        class="space-y-4"
+        method="POST"
+        action={actions.updatePassword}
+      >
+        <input
+          class="input"
+          required
+          type="password"
+          name="currentPassword"
+          placeholder="Current password"
+        />
+        <input
+          class="input"
+          required
+          type="password"
+          name="newPassword"
+          placeholder="New password"
+        />
+        <button class="btn" type="submit">Update</button>
+      </form>
+    </div>
+  </div>
+</BaseLayout>

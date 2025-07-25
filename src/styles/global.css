@@ -3,6 +3,6 @@
 
 @layer components {
   .wrapper {
-    @apply mx-auto max-w-xl px-6;
+    @apply mx-auto max-w-3xl px-6;
   }
 }

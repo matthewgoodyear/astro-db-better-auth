@@ -1,9 +1,17 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+
+import { actions } from "astro:actions";
+
+const result = Astro.getActionResult(actions.signUp);
+
+if (result && !result.error) {
+  return Astro.redirect("/dashboard");
+}
 ---
 
 <BaseLayout>
-  <div class="wrapper">
-    <h1>Test</h1>
+  <div class="wrapper | space-y-8">
+    <h1 class="text-3xl font-bold">Astro DB, Better Auth and Turso.</h1>
   </div>
 </BaseLayout>

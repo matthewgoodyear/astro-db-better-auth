@@ -1,0 +1,62 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+import { actions } from "astro:actions";
+
+const result = Astro.getActionResult(actions.signUp);
+
+if (result && !result.error) {
+  return Astro.redirect("/dashboard");
+}
+---
+
+<BaseLayout>
+  <div class="wrapper | space-y-8">
+    <h1 class="text-3xl font-bold">Sign up</h1>
+
+    {
+      result?.error && (
+        <div class="alert-destructive">
+          <h2>Something went wrong!</h2>
+          <section>{result.error.message}</section>
+        </div>
+      )
+    }
+
+    <form
+      id="signup-form"
+      class="space-y-4"
+      method="POST"
+      action={actions.signUp}
+    >
+      <input
+        class="input"
+        type="text"
+        name="name"
+        placeholder="Name"
+        required
+      />
+      <input
+        class="input"
+        type="email"
+        name="email"
+        placeholder="Email"
+        required
+      />
+      <input
+        class="input"
+        required
+        type="password"
+        name="password"
+        placeholder="Password"
+      />
+      <button class="btn" type="submit">Sign up</button>
+    </form>
+
+    <p>
+      Already have an account? <a href="/sign-in" class="ml-1 underline"
+        >Sign in here</a
+      >.
+    </p>
+  </div>
+</BaseLayout>
