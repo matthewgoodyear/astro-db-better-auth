@@ -7,6 +7,7 @@ if (!Astro.locals.session && !Astro.locals.user) {
 }
 
 const result = Astro.getActionResult(actions.updatePassword);
+const userRes = Astro.getActionResult(actions.updateUser);
 
 const isoString = Astro.locals.user!.updatedAt.toISOString();
 const date = new Date(isoString);
@@ -16,6 +17,13 @@ const formattedDate = new Intl.DateTimeFormat("en-GB", {
   timeStyle: "long",
 }).format(date);
 ---
+
+{
+  (userRes?.data?.success && !userRes.error) ||
+    (result?.data?.success && !result.error && (
+      <script>window.location.href = window.location.pathname;</script>
+    ))
+}
 
 <BaseLayout>
   <div class="wrapper | space-y-8">
@@ -93,6 +101,30 @@ const formattedDate = new Intl.DateTimeFormat("en-GB", {
           placeholder="New password"
         />
         <button class="btn" type="submit">Update password</button>
+      </form>
+    </div>
+
+    <hr />
+
+    <div class="space-y-4">
+      <h2 class="text-xl font-bold">Danger zone</h2>
+      <p>Enter your current password to delete your account.</p>
+
+      <form class="space-y-4" method="POST" action={actions.deleteAccount}>
+        <input
+          class="input"
+          required
+          type="password"
+          name="password"
+          placeholder="Password"
+        />
+
+        <button class="btn-destructive" type="submit">Delete account</button>
+
+        <label class="label gap-3">
+          <input type="checkbox" class="input" name="confirmation" />
+          I understand this action cannot be undone.
+        </label>
       </form>
     </div>
   </div>

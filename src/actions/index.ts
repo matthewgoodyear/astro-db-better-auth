@@ -59,13 +59,23 @@ export const server = {
           });
         }
 
-        const newData = {
-          name: name,
-          email: email,
-          updatedAt: new Date().toISOString(),
-        };
+        if (name !== session.user.name) {
+          await auth.api.updateUser({
+            body: {
+              name: name,
+            },
+            headers: context.request.headers,
+          });
+        }
 
-        await db.update(User).set(newData).where(eq(User.id, session.user.id));
+        if (email !== session.user.email) {
+          await auth.api.changeEmail({
+            body: {
+              newEmail: email,
+            },
+            headers: context.request.headers,
+          });
+        }
 
         return {
           success: true,
@@ -95,7 +105,6 @@ export const server = {
     }),
     handler: async ({ currentPassword, newPassword }, context) => {
       try {
-        // 1. Get user session from request headers
         const session = await auth.api.getSession({
           headers: context.request.headers,
         });
@@ -107,44 +116,20 @@ export const server = {
           });
         }
 
-        const userId = session.user.id;
-        const authCtx = await auth.$context;
-
-        // 2. Fetch the password-based account from Astro DB (Drizzle)
-        const [account] = await db
-          .select()
-          .from(Account)
-          .where(
-            and(
-              eq(Account.userId, userId),
-              eq(Account.providerId, "credential"),
-            ),
-          );
-
-        if (!account?.password) {
+        if (currentPassword === newPassword) {
           throw new ActionError({
-            code: "BAD_REQUEST",
-            message: "Password-based account not found.",
+            code: "CONFLICT",
+            message: "The new password can't be the same as the old password.",
           });
         }
 
-        // 3. Verify current password matches
-        const isMatch = await authCtx.password.verify({
-          hash: account.password,
-          password: currentPassword,
+        await auth.api.changePassword({
+          body: {
+            newPassword: newPassword,
+            currentPassword: currentPassword,
+          },
+          headers: context.request.headers,
         });
-
-        if (!isMatch) {
-          throw new ActionError({
-            code: "BAD_REQUEST",
-            message: "Current password is incorrect.",
-          });
-        }
-
-        // 4. Hash and update to the new password
-        const hashedPassword = await authCtx.password.hash(newPassword);
-
-        await authCtx.internalAdapter.updatePassword(userId, hashedPassword);
 
         return {
           success: true,
@@ -159,6 +144,59 @@ export const server = {
             error instanceof Error
               ? error.message
               : "Something went wrong while updating the password.",
+        });
+      }
+    },
+  }),
+
+  // Delete account
+  deleteAccount: defineAction({
+    accept: "form",
+    input: z.object({
+      password: z.string(),
+      confirmation: z.boolean(),
+    }),
+    handler: async ({ password, confirmation }, context) => {
+      try {
+        const session = await auth.api.getSession({
+          headers: context.request.headers,
+        });
+
+        if (!session?.user) {
+          throw new ActionError({
+            code: "UNAUTHORIZED",
+            message: "You must be signed in to delete your account.",
+          });
+        }
+
+        if (!confirmation) {
+          throw new ActionError({
+            code: "UNAUTHORIZED",
+            message: "You must confirm you want to delete your account.",
+          });
+        }
+
+        await auth.api.deleteUser({
+          body: {
+            password: password,
+            callbackURL: "/",
+          },
+          headers: context.request.headers,
+        });
+
+        return {
+          success: true,
+          message: "Account deleted successfully.",
+        };
+      } catch (error) {
+        console.error("Account deletion error:", error);
+
+        throw new ActionError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            error instanceof Error
+              ? error.message
+              : "Something went wrong while deleting your account.",
         });
       }
     },

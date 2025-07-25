@@ -6,7 +6,7 @@ import { actions } from "astro:actions";
 const result = Astro.getActionResult(actions.signUp);
 
 if (result && !result.error) {
-  return Astro.redirect("/dashboard");
+  return Astro.redirect("/sign-in");
 }
 ---
 
