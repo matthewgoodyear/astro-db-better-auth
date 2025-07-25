@@ -8,16 +8,19 @@ if (!Astro.locals.session && !Astro.locals.user) {
 
 const result = Astro.getActionResult(actions.updatePassword);
 
-const signOutResult = Astro.getActionResult(actions.signOut);
+const isoString = Astro.locals.user!.updatedAt.toISOString();
+const date = new Date(isoString);
 
-if (signOutResult && !signOutResult.error) {
-  return Astro.redirect("/");
-}
+const formattedDate = new Intl.DateTimeFormat("en-GB", {
+  dateStyle: "medium",
+  timeStyle: "long",
+}).format(date);
 ---
 
 <BaseLayout>
   <div class="wrapper | space-y-8">
     <h1 class="text-3xl font-bold">Account settings</h1>
+    <p>Last updated: {formattedDate}</p>
 
     {
       result?.error && (
@@ -61,7 +64,7 @@ if (signOutResult && !signOutResult.error) {
           value={Astro.locals.user?.email}
           required
         />
-        <button class="btn" type="submit">Update</button>
+        <button class="btn" type="submit">Update profile</button>
       </form>
     </div>
 
@@ -89,7 +92,7 @@ if (signOutResult && !signOutResult.error) {
           name="newPassword"
           placeholder="New password"
         />
-        <button class="btn" type="submit">Update</button>
+        <button class="btn" type="submit">Update password</button>
       </form>
     </div>
   </div>

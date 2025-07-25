@@ -62,6 +62,7 @@ export const server = {
         const newData = {
           name: name,
           email: email,
+          updatedAt: new Date().toISOString(),
         };
 
         await db.update(User).set(newData).where(eq(User.id, session.user.id));

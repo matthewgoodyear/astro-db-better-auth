@@ -7,8 +7,8 @@ const User = defineTable({
     email: column.text({ unique: true }),
     emailVerified: column.boolean({ default: false }),
     image: column.text({ optional: true }),
-    createdAt: column.text({ default: new Date().toISOString() }),
-    updatedAt: column.text({ default: new Date().toISOString() }),
+    createdAt: column.date({ default: new Date() }),
+    updatedAt: column.date({ default: new Date() }),
   },
 });
 
@@ -20,8 +20,8 @@ const Session = defineTable({
     expiresAt: column.text(),
     ipAddress: column.text({ optional: true }),
     userAgent: column.text({ optional: true }),
-    createdAt: column.text({ default: new Date().toISOString() }),
-    updatedAt: column.text({ default: new Date().toISOString() }),
+    createdAt: column.date({ default: new Date() }),
+    updatedAt: column.date({ default: new Date() }),
   },
 });
 
@@ -38,8 +38,8 @@ const Account = defineTable({
     scope: column.text({ optional: true }),
     idToken: column.text({ optional: true }),
     password: column.text({ optional: true }),
-    createdAt: column.text({ default: new Date().toISOString() }),
-    updatedAt: column.text({ default: new Date().toISOString() }),
+    createdAt: column.date({ default: new Date() }),
+    updatedAt: column.date({ default: new Date() }),
   },
 });
 
@@ -49,8 +49,8 @@ const Verification = defineTable({
     identifier: column.text(),
     value: column.text(),
     expiresAt: column.text(),
-    createdAt: column.text({ default: new Date().toISOString() }),
-    updatedAt: column.text({ default: new Date().toISOString() }),
+    createdAt: column.date({ default: new Date() }),
+    updatedAt: column.date({ default: new Date() }),
   },
 });
 

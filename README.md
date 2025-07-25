@@ -5,7 +5,7 @@
 
 Example of how to implement AstroDB, Turso, and Better Auth.
 
-This was a bit of a nightmare to figure out but I got there in the end.
+This took me a bit of time to figure out, so I thought the instructions could be useful.
 
 ## Step by step guide
 
@@ -143,19 +143,34 @@ export const onRequest = defineMiddleware(async (context, next) => {
 https://docs.turso.tech/cli/introduction
 
 Install Turso CLI
-`brew install tursodatabase/tap/turso`
+
+```sh
+brew install tursodatabase/tap/turso
+```
 
 Authenticate by logging in
-`turso auth signup`
+
+```sh
+turso auth signup
+```
 
 Create the remote database
-`turso db create [your-db-name]`
+
+```sh
+turso db create [your-db-name]
+```
 
 Get info about the database
-`turso db show [your-db-name]`
+
+```sh
+turso db show [your-db-name]
+```
 
 Create app token
-`turso db tokens create [your-db-name]`
+
+```sh
+turso db tokens create [your-db-name]
+```
 
 Populate the .env file with the info like so:
 
@@ -164,8 +179,11 @@ ASTRO_DB_REMOTE_URL=libsql://insert-your-url-here.turso.io
 ASTRO_DB_APP_TOKEN=insert-your-token-here
 ```
 
-Push the database _schema_ to Turso.
-`astro db push --remote`
+Push the database schema to Turso.
+
+```sh
+astro db push --remote
+```
 
 Update the build command and create a new dev command that's able to use the production database.
 
