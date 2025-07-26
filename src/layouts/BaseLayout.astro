@@ -10,6 +10,9 @@ import Header from "@/components/Header.astro";
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <title>Astro DB Better Auth</title>
+    <script
+      src="https://cdn.jsdelivr.net/npm/basecoat-css@0.2.8/dist/js/toast.min.js"
+      defer></script>
   </head>
 
   <body>
@@ -17,5 +20,6 @@ import Header from "@/components/Header.astro";
     <main class="py-10">
       <slot />
     </main>
+    <div id="toaster" class="toaster"></div>
   </body>
 </html>

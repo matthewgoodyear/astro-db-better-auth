@@ -52,13 +52,16 @@ const session = Astro.locals.session ? true : false;
     e.preventDefault();
 
     try {
-      const result = await authClient.signOut();
-
-      if (result.error) {
-        console.error("Sign out failed:", result.error.message);
-      } else {
-        window.location.href = "/";
-      }
+      await authClient.signOut({
+        fetchOptions: {
+          onSuccess: () => {
+            window.location.href = "/sign-in";
+          },
+          onError: (context) => {
+            console.error("Sign out failed:", context.error.message);
+          },
+        },
+      });
     } catch (error) {
       console.error("Unexpected error during sign out:", error);
     }

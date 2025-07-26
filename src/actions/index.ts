@@ -1,7 +1,8 @@
 import { defineAction, ActionError } from "astro:actions";
 import { z } from "astro:schema";
 import { auth } from "@/lib/auth";
-import { Account, db, and, eq, User } from "astro:db";
+import { Account, db, eq, User } from "astro:db";
+import { APIError } from "better-auth/api";
 
 export const server = {
   // Sign-up
@@ -9,8 +10,8 @@ export const server = {
     accept: "form",
     input: z.object({
       name: z.string(),
-      email: z.string(),
-      password: z.string(),
+      email: z.string().email(),
+      password: z.string().min(8).max(32),
     }),
     handler: async ({ name, email, password }) => {
       try {
@@ -27,8 +28,6 @@ export const server = {
           message: "Check your inbox to verify your email.",
         };
       } catch (error) {
-        console.error("Sign up error:", error);
-
         throw new ActionError({
           code: "BAD_REQUEST",
           message:
@@ -40,10 +39,48 @@ export const server = {
     },
   }),
 
+  // Sign-in
+  // TODO check sign in/out is better server or client
+  // signIn: defineAction({
+  //   accept: "form",
+  //   input: z.object({
+  //     email: z.string().email(),
+  //     password: z.string(),
+  //   }),
+  //   handler: async ({ email, password }, context) => {
+  //     try {
+  //       const response = await auth.api.signInEmail({
+  //         body: {
+  //           email,
+  //           password,
+  //           rememberMe: true,
+  //         },
+  //         headers: context.request.headers,
+  //         asResponse: true,
+  //       });
+
+  //       return {
+  //         success: true,
+  //         message: "Signed-in successfully.",
+  //         cookies: response.headers.getSetCookie(),
+  //       };
+  //     } catch (error) {
+  //       throw new ActionError({
+  //         code: "UNAUTHORIZED",
+  //         message:
+  //           error instanceof APIError
+  //             ? error.message
+  //             : "Something went wrong while signing-in.",
+  //       });
+  //     }
+  //   },
+  // }),
+
+  // Update user
   updateUser: defineAction({
     accept: "form",
     input: z.object({
-      name: z.string().min(1),
+      name: z.string().min(2),
       email: z.string().email(),
     }),
     handler: async ({ name, email }, context) => {
@@ -66,6 +103,11 @@ export const server = {
             },
             headers: context.request.headers,
           });
+
+          await db
+            .update(User)
+            .set({ updatedAt: new Date() })
+            .where(eq(User.id, session.user.id));
         }
 
         if (email !== session.user.email) {
@@ -75,6 +117,11 @@ export const server = {
             },
             headers: context.request.headers,
           });
+
+          await db
+            .update(User)
+            .set({ updatedAt: new Date() })
+            .where(eq(User.id, session.user.id));
         }
 
         return {
@@ -82,7 +129,6 @@ export const server = {
           message: "Account updated successfully.",
         };
       } catch (error) {
-        console.error("Update user error:", error);
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
           message:
@@ -99,9 +145,7 @@ export const server = {
     accept: "form",
     input: z.object({
       currentPassword: z.string(),
-      newPassword: z
-        .string()
-        .min(8, "Password must be at least 8 characters long"),
+      newPassword: z.string().min(8).max(32),
     }),
     handler: async ({ currentPassword, newPassword }, context) => {
       try {
@@ -131,13 +175,16 @@ export const server = {
           headers: context.request.headers,
         });
 
+        await db
+          .update(Account)
+          .set({ updatedAt: new Date() })
+          .where(eq(Account.userId, session.user.id));
+
         return {
           success: true,
           message: "Password updated successfully.",
         };
       } catch (error) {
-        console.error("Password update error:", error);
-
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
           message:
@@ -179,7 +226,6 @@ export const server = {
         await auth.api.deleteUser({
           body: {
             password: password,
-            callbackURL: "/",
           },
           headers: context.request.headers,
         });
@@ -189,8 +235,6 @@ export const server = {
           message: "Account deleted successfully.",
         };
       } catch (error) {
-        console.error("Account deletion error:", error);
-
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
           message:

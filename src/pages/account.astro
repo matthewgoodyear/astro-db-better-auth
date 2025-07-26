@@ -3,11 +3,19 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import { actions } from "astro:actions";
 
 if (!Astro.locals.session && !Astro.locals.user) {
-  return Astro.redirect("/sign-in");
+  return Astro.redirect("/sign-in/");
 }
 
-const result = Astro.getActionResult(actions.updatePassword);
-const userRes = Astro.getActionResult(actions.updateUser);
+// const result = Astro.getActionResult(actions.updatePassword);
+
+// const userRes = Astro.getActionResult(actions.updateUser);
+
+// if (userRes && !userRes.error) {
+//   Astro.response.headers.append("Location", "/account/");
+//   Astro.response.status = 302;
+
+//   return new Response(null, Astro.response);
+// }
 
 const isoString = Astro.locals.user!.updatedAt.toISOString();
 const date = new Date(isoString);
@@ -18,50 +26,21 @@ const formattedDate = new Intl.DateTimeFormat("en-GB", {
 }).format(date);
 ---
 
-{
-  (userRes?.data?.success && !userRes.error) ||
-    (result?.data?.success && !result.error && (
-      <script>window.location.href = window.location.pathname;</script>
-    ))
-}
-
 <BaseLayout>
   <div class="wrapper | space-y-8">
     <h1 class="text-3xl font-bold">Account settings</h1>
     <p>Last updated: {formattedDate}</p>
 
-    {
-      result?.error && (
-        <div class="alert-destructive">
-          <h2>Something went wrong!</h2>
-          <section>{result.error.message}</section>
-        </div>
-      )
-    }
-
-    {
-      result?.data?.success && (
-        <div class="alert">
-          <h2>Success!</h2>
-          <section>{result.data?.message}</section>
-        </div>
-      )
-    }
-
     <hr />
 
     <div class="space-y-4">
       <h2 class="text-xl font-bold">Profile</h2>
-      <form
-        id="update-account-form"
-        class="space-y-4"
-        method="POST"
-        action={actions.updateUser}
-      >
+      <form id="update-account-form" class="space-y-4">
         <input
           class="input"
           type="text"
           name="name"
+          minlength="2"
           value={Astro.locals.user?.name}
           required
         />
@@ -80,12 +59,34 @@ const formattedDate = new Intl.DateTimeFormat("en-GB", {
 
     <div class="space-y-4">
       <h2 class="text-xl font-bold">Update password</h2>
-      <form
-        id="signup-form"
-        class="space-y-4"
-        method="POST"
-        action={actions.updatePassword}
+
+      <div
+        id="error-box"
+        class="alert-destructive hidden border-red-200 bg-red-50"
       >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          ><circle cx="12" cy="12" r="10"></circle><line
+            x1="12"
+            x2="12"
+            y1="8"
+            y2="12"></line><line x1="12" x2="12.01" y1="16" y2="16"></line></svg
+        >
+        <h2>Something went wrong!</h2>
+        <section id="error-message">
+          Your session has expired. Please log in again.
+        </section>
+      </div>
+
+      <form id="update-password-form" class="space-y-4">
         <input
           class="input"
           required
@@ -99,6 +100,8 @@ const formattedDate = new Intl.DateTimeFormat("en-GB", {
           type="password"
           name="newPassword"
           placeholder="New password"
+          minlength="8"
+          maxlength="32"
         />
         <button class="btn" type="submit">Update password</button>
       </form>
@@ -110,7 +113,7 @@ const formattedDate = new Intl.DateTimeFormat("en-GB", {
       <h2 class="text-xl font-bold">Danger zone</h2>
       <p>Enter your current password to delete your account.</p>
 
-      <form class="space-y-4" method="POST" action={actions.deleteAccount}>
+      <form id="delete-account-form" class="space-y-4">
         <input
           class="input"
           required
@@ -122,10 +125,118 @@ const formattedDate = new Intl.DateTimeFormat("en-GB", {
         <button class="btn-destructive" type="submit">Delete account</button>
 
         <label class="label gap-3">
-          <input type="checkbox" class="input" name="confirmation" />
-          I understand this action cannot be undone.
+          <input type="checkbox" class="input" name="confirmation" required />
+          I understand this action can not be undone.
         </label>
       </form>
     </div>
   </div>
 </BaseLayout>
+
+<script>
+  import { authClient } from "@/lib/auth-client";
+  import { actions } from "astro:actions";
+
+  const updateAccountForm = document.querySelector<HTMLFormElement>(
+    "#update-account-form",
+  );
+  const updatePasswordForm = document.querySelector<HTMLFormElement>(
+    "#update-password-form",
+  );
+  const deleteAccountForm = document.querySelector<HTMLFormElement>(
+    "#delete-account-form",
+  );
+  const errorBox = document.querySelector("#error-box") as HTMLElement;
+  const errorMessage = document.querySelector("#error-message") as HTMLElement;
+
+  const displayError = (message: string): void => {
+    errorMessage.textContent = message;
+    errorBox.classList.remove("hidden");
+  };
+
+  const hideError = (): void => {
+    errorMessage.textContent = "";
+    errorBox.classList.add("hidden");
+  };
+
+  updateAccountForm?.addEventListener("submit", async (e: SubmitEvent) => {
+    e.preventDefault();
+
+    const formData = new FormData(updateAccountForm);
+
+    const { error, data } = await actions.updateUser(formData);
+
+    if (!error) {
+      document.dispatchEvent(
+        new CustomEvent("basecoat:toast", {
+          detail: {
+            config: {
+              category: "success",
+              title: "Success",
+              description: data.message,
+              cancel: {
+                label: "Dismiss",
+              },
+            },
+          },
+        }),
+      );
+    }
+  });
+
+  updatePasswordForm?.addEventListener("submit", async (e: SubmitEvent) => {
+    e.preventDefault();
+    hideError();
+
+    const formData = new FormData(updatePasswordForm);
+
+    const { error, data } = await actions.updatePassword(formData);
+
+    if (!error) {
+      updatePasswordForm.reset();
+      document.dispatchEvent(
+        new CustomEvent("basecoat:toast", {
+          detail: {
+            config: {
+              category: "success",
+              title: "Success",
+              description: data.message,
+              cancel: {
+                label: "Dismiss",
+              },
+            },
+          },
+        }),
+      );
+    } else {
+      displayError(
+        error.message || "Invalid email or password. Please try again.",
+      );
+      errorBox.classList.remove("hidden");
+    }
+  });
+
+  deleteAccountForm?.addEventListener("submit", async (e: SubmitEvent) => {
+    e.preventDefault();
+
+    const formData = new FormData(deleteAccountForm);
+    const password = formData.get("password") as string;
+
+    try {
+      const { error, data } = await actions.deleteAccount(formData);
+      // const { error, data } = await authClient.deleteUser({ password });
+
+      if (!error) {
+        window.location.href = "/sign-in/";
+      }
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.log(
+          `An unexpected error occurred: ${error.message}. Please try again.`,
+        );
+      } else {
+        console.log("An unknown error occurred. Please try again.");
+      }
+    }
+  });
+</script>
