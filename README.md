@@ -7,6 +7,8 @@ A simple project created with **Astro**, **Astro DB** and **Better Auth**, conne
 
 This took me a bit of time to figure out, so I thought the instructions could be useful.
 
+I've kept most auth logic client side after reading this recommendation: https://github.com/better-auth/better-auth/pull/2987/files?short_path=526860b#diff-526860b5c0d9d9e59a79a28fcead2aac495dddaff1d4ce4f2867372c25410653
+
 ---
 
 ## Getting started

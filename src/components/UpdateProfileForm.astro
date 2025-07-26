@@ -1,0 +1,112 @@
+---
+import { formatDate } from "@/lib/utils";
+
+const userUpdatedAt = formatDate(Astro.locals.user?.updatedAt!);
+---
+
+<div class="space-y-4">
+  <h2 class="text-xl font-bold">Profile</h2>
+  <p>Last updated: {userUpdatedAt}</p>
+
+  <form id="update-profile-form" class="space-y-4">
+    <input
+      id="account-name"
+      class="input"
+      type="text"
+      name="name"
+      minlength="2"
+      value={Astro.locals.user?.name}
+      required
+    />
+    <input
+      id="account-email"
+      class="input"
+      type="email"
+      name="email"
+      value={Astro.locals.user?.email}
+      required
+    />
+    <button class="btn" type="submit">Update profile</button>
+  </form>
+</div>
+
+<script>
+  import { authClient } from "@/lib/auth-client";
+
+  const session = await authClient.getSession();
+  const updateProfileForm = document.querySelector<HTMLFormElement>(
+    "#update-profile-form",
+  );
+
+  updateProfileForm?.addEventListener("submit", async (e: SubmitEvent) => {
+    e.preventDefault();
+
+    const formData = new FormData(updateProfileForm);
+    const name = formData.get("name") as string;
+    const newEmail = formData.get("email") as string;
+
+    try {
+      if (name !== session.data?.user.name) {
+        await authClient.updateUser(
+          { name },
+          {
+            onSuccess: (context) => {
+              const nameInput = document.getElementById("account-name");
+              if (nameInput) nameInput.setAttribute("value", name);
+
+              document.dispatchEvent(
+                new CustomEvent("basecoat:toast", {
+                  detail: {
+                    config: {
+                      category: "success",
+                      title: "Success",
+                      description: context.data.message,
+                      cancel: {
+                        label: "Dismiss",
+                      },
+                    },
+                  },
+                }),
+              );
+            },
+            onError: (context) => {
+              console.error(context.error.message);
+            },
+          },
+        );
+      }
+
+      if (newEmail !== session.data?.user.email) {
+        await authClient.changeEmail(
+          { newEmail },
+          {
+            onSuccess: (context) => {
+              const emailInput = document.getElementById("account-email");
+              if (emailInput) emailInput.setAttribute("value", newEmail);
+
+              document.dispatchEvent(
+                new CustomEvent("basecoat:toast", {
+                  detail: {
+                    config: {
+                      category: "success",
+                      title: "Success",
+                      description: context.data.message,
+                      cancel: {
+                        label: "Dismiss",
+                      },
+                    },
+                  },
+                }),
+              );
+            },
+            onError: (context) => {
+              console.error(context.error.message);
+            },
+          },
+        );
+      }
+    } catch (error) {
+      console.error("Something went wrong while updating the account:", error);
+    }
+  });
+</script>

@@ -1,13 +1,5 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-
-import { actions } from "astro:actions";
-
-const result = Astro.getActionResult(actions.signUp);
-
-if (result && !result.error) {
-  return Astro.redirect("/dashboard");
-}
 ---
 
 <BaseLayout>

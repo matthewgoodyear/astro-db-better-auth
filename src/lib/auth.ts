@@ -24,4 +24,20 @@ export const auth = betterAuth({
       enabled: true,
     },
   },
+  databaseHooks: {
+    user: {
+      update: {
+        before: async (userData) => {
+          return { data: { ...userData, updatedAt: new Date() } };
+        },
+      },
+    },
+    account: {
+      update: {
+        before: async (userData) => {
+          return { data: { ...userData, updatedAt: new Date() } };
+        },
+      },
+    },
+  },
 });

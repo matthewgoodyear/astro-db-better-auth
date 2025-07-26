@@ -1,0 +1,99 @@
+---
+
+---
+
+<div class="space-y-4">
+  <h2 class="text-xl font-bold">Danger zone</h2>
+
+  <button
+    type="button"
+    onclick="document.getElementById('alert-dialog').showModal()"
+    class="btn-destructive">Delete account</button
+  >
+
+  <dialog
+    id="alert-dialog"
+    class="dialog"
+    aria-labelledby="alert-dialog-title"
+    aria-describedby="alert-dialog-description"
+  >
+    <article>
+      <header>
+        <h2 id="alert-dialog-title">Are you absolutely sure?</h2>
+        <p id="alert-dialog-description">
+          This action cannot be undone. This will permanently delete your
+          account and remove your data from our servers.
+        </p>
+      </header>
+
+      <section class="space-y-2">
+        <p id="delete-error-message" class="hidden text-xs text-red-600"></p>
+
+        <form id="delete-account-form" class="space-y-4">
+          <input
+            class="input"
+            required
+            type="password"
+            name="password"
+            placeholder="Password"
+          />
+
+          <div class="flex gap-2">
+            <button
+              class="btn-outline"
+              type="reset"
+              onclick="document.getElementById('alert-dialog').close()"
+              >Cancel</button
+            >
+            <button class="btn-destructive" type="submit">Continue</button>
+          </div>
+        </form>
+      </section>
+    </article>
+  </dialog>
+</div>
+
+<script>
+  import { authClient } from "@/lib/auth-client";
+
+  const deleteAccountForm = document.querySelector<HTMLFormElement>(
+    "#delete-account-form",
+  );
+  const errorMessage = document.querySelector(
+    "#delete-error-message",
+  ) as HTMLElement;
+
+  const displayError = (message: string): void => {
+    errorMessage.textContent = message;
+    errorMessage.classList.remove("hidden");
+  };
+
+  const hideError = (): void => {
+    errorMessage.textContent = "";
+    errorMessage.classList.add("hidden");
+  };
+
+  deleteAccountForm?.addEventListener("submit", async (e: SubmitEvent) => {
+    e.preventDefault();
+    hideError();
+
+    const formData = new FormData(deleteAccountForm);
+    const password = formData.get("password") as string;
+
+    try {
+      await authClient.deleteUser(
+        { password },
+        {
+          onSuccess: () => {
+            window.location.href = "/sign-in";
+          },
+          onError: (context) => {
+            displayError(context.error.message);
+          },
+        },
+      );
+    } catch (error) {
+      console.error("Unexpected error when deleting your account:", error);
+    }
+  });
+</script>
