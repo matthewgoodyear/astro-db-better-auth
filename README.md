@@ -3,7 +3,7 @@
 > [!WARNING]  
 > This repo and the instructions below are currently in progress.
 
-A simple project created with **Astro**, **Astro DB** and **Better Auth**, connected to a **Turso Database**.
+A simple project created with **Astro**, **Astro DB** and **Better Auth**, connected to a **Turso Database**. Emails powered by **Resend**.
 
 This took me a bit of time to figure out, so I thought the instructions could be useful.
 
@@ -15,30 +15,40 @@ I've kept most auth logic client side after reading this recommendation: https:/
 
 Follow these steps to set up and run the application locally:
 
-1. **Clone the Repository**
+1. **Clone the repository**
 
 ```sh
 git clone https://github.com/matthewgoodyear/astro-db-better-auth
-cd astro-todoapp
+cd astro-db-better-auth
 ```
 
-2. **Install Dependencies**
+2. **Install dependencies**
 
 ```sh
 npm install
 ```
 
-3. **Create Environment Variables**
+3. **Create environment variables**
 
 ```sh
-ASTRO_DB_REMOTE_URL=libsql://insert-your-url-here.turso.io
+# Database
+ASTRO_DB_REMOTE_URL=libsql://example.turso.io
 ASTRO_DB_APP_TOKEN=insert-your-token-here
 
-BETTER_AUTH_SECRET=your-better-auth-token
+# Better Auth
+BETTER_AUTH_SECRET=insert-your-secret-here
 BETTER_AUTH_URL=http://localhost:4321
+
+# GitHub
+GITHUB_CLIENT_ID=insert-your-id-here
+GITHUB_CLIENT_SECRET=insert-your-secret-here
+
+# Resend
+RESEND_API_KEY=insert-your-api-key-here
+RESEND_EMAIL=example@email.com
 ```
 
-4. **Start Dev Server**
+4. **Start dev server**
 
 ```sh
 npm run dev

@@ -3,7 +3,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 ---
 
 <BaseLayout>
-  <div class="wrapper | space-y-8">
+  <div class="wrapper | max-w-md space-y-8">
     <h1 class="text-3xl font-bold">Sign up</h1>
 
     <div
@@ -14,31 +14,45 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
       <section id="error-message"></section>
     </div>
 
-    <form id="signup-form" class="space-y-4">
-      <input
-        class="input"
-        type="text"
-        name="name"
-        placeholder="Name"
-        required
-      />
-      <input
-        class="input"
-        type="email"
-        name="email"
-        placeholder="Email"
-        required
-      />
-      <input
-        class="input"
-        required
-        type="password"
-        name="password"
-        placeholder="Password"
-        minlength="8"
-        maxlength="32"
-      />
-      <button class="btn" type="submit">Sign up</button>
+    <form id="signup-form" class="space-y-6">
+      <div class="grid gap-2">
+        <label class="label" for="name">Name</label>
+        <input
+          id="name"
+          class="input"
+          type="text"
+          name="name"
+          placeholder="Joe Bloggs"
+          required
+        />
+      </div>
+
+      <div class="grid gap-2">
+        <label class="label" for="email">Email</label>
+        <input
+          id="email"
+          class="input"
+          type="email"
+          name="email"
+          placeholder="joe@email.com"
+          required
+        />
+      </div>
+
+      <div class="grid gap-2">
+        <label class="label" for="password">Password</label>
+        <input
+          id="password"
+          class="input"
+          required
+          type="password"
+          name="password"
+          minlength="8"
+          maxlength="32"
+        />
+      </div>
+
+      <button class="btn | w-full" type="submit">Sign up</button>
     </form>
 
     <p>

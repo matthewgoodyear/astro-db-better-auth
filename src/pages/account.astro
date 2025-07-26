@@ -3,15 +3,27 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import UpdatePasswordForm from "@/components/UpdatePasswordForm.astro";
 import UpdateProfileForm from "@/components/UpdateProfileForm.astro";
 import DeleteAccountForm from "@/components/DeleteAccountForm.astro";
+import { db, Account as Acc, eq } from "astro:db";
 
 if (!Astro.locals.session && !Astro.locals.user) {
   return Astro.redirect("/sign-in");
 }
+
+const verified = Astro.locals.user?.emailVerified;
+
+const provider = await db
+  .select({ providerId: Acc.providerId })
+  .from(Acc)
+  .where(eq(Acc.userId, Astro.locals.user?.id as string));
+
+const pass = String(provider[0].providerId) === "credential" ? true : false;
 ---
 
 <BaseLayout>
   <div class="wrapper | space-y-8">
     <h1 class="text-3xl font-bold">Account settings</h1>
+
+    {!verified && <p>Email not verified. Send verification link.</p>}
 
     <hr />
 
@@ -19,9 +31,14 @@ if (!Astro.locals.session && !Astro.locals.user) {
 
     <hr />
 
-    <UpdatePasswordForm />
-
-    <hr />
+    {
+      pass && (
+        <>
+          <UpdatePasswordForm />
+          <hr />
+        </>
+      )
+    }
 
     <DeleteAccountForm />
   </div>

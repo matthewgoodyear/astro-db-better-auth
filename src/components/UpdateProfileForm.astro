@@ -4,28 +4,38 @@ import { formatDate } from "@/lib/utils";
 const userUpdatedAt = formatDate(Astro.locals.user?.updatedAt!);
 ---
 
-<div class="space-y-4">
-  <h2 class="text-xl font-bold">Profile</h2>
-  <p>Last updated: {userUpdatedAt}</p>
+<div class="space-y-6">
+  <div>
+    <h2 class="text-xl font-bold">Profile</h2>
+    <p class="text-muted-foreground">Last updated: {userUpdatedAt}</p>
+  </div>
 
-  <form id="update-profile-form" class="space-y-4">
-    <input
-      id="account-name"
-      class="input"
-      type="text"
-      name="name"
-      minlength="2"
-      value={Astro.locals.user?.name}
-      required
-    />
-    <input
-      id="account-email"
-      class="input"
-      type="email"
-      name="email"
-      value={Astro.locals.user?.email}
-      required
-    />
+  <form id="update-profile-form" class="space-y-6">
+    <div class="grid gap-2">
+      <label class="label" for="account-name">Name</label>
+      <input
+        id="account-name"
+        class="input"
+        type="text"
+        name="name"
+        minlength="2"
+        value={Astro.locals.user?.name}
+        required
+      />
+    </div>
+
+    <div class="grid gap-2">
+      <label class="label" for="account-email">Email</label>
+      <input
+        id="account-email"
+        class="input"
+        type="email"
+        name="email"
+        value={Astro.locals.user?.email}
+        required
+      />
+    </div>
+
     <button class="btn" type="submit">Update profile</button>
   </form>
 </div>
@@ -37,6 +47,22 @@ const userUpdatedAt = formatDate(Astro.locals.user?.updatedAt!);
   const updateProfileForm = document.querySelector<HTMLFormElement>(
     "#update-profile-form",
   );
+  const nameInput = document.getElementById(
+    "account-name",
+  ) as HTMLInputElement | null;
+  const emailInput = document.getElementById(
+    "account-email",
+  ) as HTMLInputElement | null;
+
+  nameInput?.addEventListener("input", (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    nameInput.setAttribute("value", target.value);
+  });
+
+  emailInput?.addEventListener("input", (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    emailInput.setAttribute("value", target.value);
+  });
 
   updateProfileForm?.addEventListener("submit", async (e: SubmitEvent) => {
     e.preventDefault();
@@ -51,9 +77,6 @@ const userUpdatedAt = formatDate(Astro.locals.user?.updatedAt!);
           { name },
           {
             onSuccess: (context) => {
-              const nameInput = document.getElementById("account-name");
-              if (nameInput) nameInput.setAttribute("value", name);
-
               document.dispatchEvent(
                 new CustomEvent("basecoat:toast", {
                   detail: {
@@ -81,9 +104,6 @@ const userUpdatedAt = formatDate(Astro.locals.user?.updatedAt!);
           { newEmail },
           {
             onSuccess: (context) => {
-              const emailInput = document.getElementById("account-email");
-              if (emailInput) emailInput.setAttribute("value", newEmail);
-
               document.dispatchEvent(
                 new CustomEvent("basecoat:toast", {
                   detail: {
