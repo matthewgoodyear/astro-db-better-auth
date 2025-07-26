@@ -20,10 +20,19 @@ const pass = String(provider[0].providerId) === "credential" ? true : false;
 ---
 
 <BaseLayout>
-  <div class="wrapper | space-y-8">
+  <div class="wrapper | max-w-lg space-y-8">
     <h1 class="text-3xl font-bold">Account settings</h1>
 
-    {!verified && <p>Email not verified. Send verification link.</p>}
+    {
+      !verified && (
+        <div class="flex items-center justify-between">
+          <h2>Your email is not verified.</h2>
+          <button id="verify-email" class="btn-sm">
+            Verify
+          </button>
+        </div>
+      )
+    }
 
     <hr />
 
@@ -43,3 +52,49 @@ const pass = String(provider[0].providerId) === "credential" ? true : false;
     <DeleteAccountForm />
   </div>
 </BaseLayout>
+
+<script>
+  import { authClient } from "@/lib/auth-client";
+
+  const session = await authClient.getSession();
+  const userEmail = session.data?.user.email as string;
+  const verifyButton =
+    document.querySelector<HTMLButtonElement>("#verify-email");
+
+  verifyButton?.addEventListener("click", async (e: MouseEvent) => {
+    e.preventDefault();
+
+    try {
+      await authClient.sendVerificationEmail(
+        {
+          email: userEmail,
+          callbackURL: "/dashboard",
+        },
+        {
+          onSuccess: (context) => {
+            document.dispatchEvent(
+              new CustomEvent("basecoat:toast", {
+                detail: {
+                  config: {
+                    category: "success",
+                    title: "Success",
+                    description: context.data.message,
+                    cancel: {
+                      label: "Dismiss",
+                    },
+                  },
+                },
+              }),
+            );
+          },
+          onError: (context) => {
+            console.log(context);
+            console.error("Email verification failed:", context.error.message);
+          },
+        },
+      );
+    } catch (error) {
+      console.error("Unexpected error:", error);
+    }
+  });
+</script>
