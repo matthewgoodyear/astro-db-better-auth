@@ -31,7 +31,7 @@ export const server = {
         throw new ActionError({
           code: "BAD_REQUEST",
           message:
-            error instanceof Error
+            error instanceof APIError
               ? error.message
               : "Sign up failed. Please try again.",
         });
@@ -40,41 +40,48 @@ export const server = {
   }),
 
   // Sign-in
-  // TODO check sign in/out is better server or client
-  // signIn: defineAction({
-  //   accept: "form",
-  //   input: z.object({
-  //     email: z.string().email(),
-  //     password: z.string(),
-  //   }),
-  //   handler: async ({ email, password }, context) => {
-  //     try {
-  //       const response = await auth.api.signInEmail({
-  //         body: {
-  //           email,
-  //           password,
-  //           rememberMe: true,
-  //         },
-  //         headers: context.request.headers,
-  //         asResponse: true,
-  //       });
+  signIn: defineAction({
+    accept: "form",
+    input: z.object({
+      email: z.string().email(),
+      password: z.string(),
+    }),
+    handler: async ({ email, password }, context) => {
+      try {
+        const response = await auth.api.signInEmail({
+          body: {
+            email,
+            password,
+            rememberMe: true,
+          },
+          headers: context.request.headers,
+          asResponse: true,
+        });
 
-  //       return {
-  //         success: true,
-  //         message: "Signed-in successfully.",
-  //         cookies: response.headers.getSetCookie(),
-  //       };
-  //     } catch (error) {
-  //       throw new ActionError({
-  //         code: "UNAUTHORIZED",
-  //         message:
-  //           error instanceof APIError
-  //             ? error.message
-  //             : "Something went wrong while signing-in.",
-  //       });
-  //     }
-  //   },
-  // }),
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new ActionError({
+            code: "UNAUTHORIZED",
+            message: errorData.message,
+          });
+        }
+
+        return {
+          success: true,
+          message: "Signed-in successfully.",
+          cookies: response.headers.getSetCookie(),
+        };
+      } catch (error) {
+        throw new ActionError({
+          code: "UNAUTHORIZED",
+          message:
+            error instanceof APIError
+              ? error.message
+              : "Something went wrong while signing in.",
+        });
+      }
+    },
+  }),
 
   // Update user
   updateUser: defineAction({
@@ -132,7 +139,7 @@ export const server = {
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
           message:
-            error instanceof Error
+            error instanceof APIError
               ? error.message
               : "Something went wrong while updating the account.",
         });
@@ -188,7 +195,7 @@ export const server = {
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
           message:
-            error instanceof Error
+            error instanceof APIError
               ? error.message
               : "Something went wrong while updating the password.",
         });
@@ -238,7 +245,7 @@ export const server = {
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
           message:
-            error instanceof Error
+            error instanceof APIError
               ? error.message
               : "Something went wrong while deleting your account.",
         });
