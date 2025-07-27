@@ -5,8 +5,11 @@ import { defineConfig } from "astro/config";
 import db from "@astrojs/db";
 import tailwindcss from "@tailwindcss/vite";
 
+import vercel from "@astrojs/vercel";
+
 export default defineConfig({
   output: "server",
+
   devToolbar: {
     enabled: false,
   },
@@ -17,5 +20,5 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
 
-  // adapter: vercel(),
+  adapter: vercel(),
 });
