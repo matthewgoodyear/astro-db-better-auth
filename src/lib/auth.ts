@@ -13,6 +13,7 @@ export const auth = betterAuth({
       verification: Verification,
     },
   }),
+  trustedOrigins: ["http://localhost:4321", import.meta.env.BETTER_AUTH_URL],
   emailAndPassword: {
     enabled: true,
     autoSignIn: false,
