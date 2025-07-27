@@ -17,19 +17,17 @@ export const auth = betterAuth({
     enabled: true,
     autoSignIn: false,
     requireEmailVerification: false,
-    sendResetPassword: async ({ user, url, token }, request) => {
+    sendResetPassword: async ({ user, url }) => {
       await sendEmail({
         to: user.email,
         subject: "Reset your password",
         text: `Click the link to reset your password: ${url}`,
       });
     },
-    onPasswordReset: async ({ user }, request) => {
-      // TODO logic here?
-      console.log(`Password for user ${user.email} has been reset.`);
-    },
   },
   emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
       await sendEmail({
         to: user.email,
@@ -37,8 +35,6 @@ export const auth = betterAuth({
         text: `Click the link to verify your email: ${url}`,
       });
     },
-    sendOnSignUp: true,
-    autoSignInAfterVerification: true,
   },
   socialProviders: {
     github: {

@@ -5,13 +5,19 @@
 
 A simple project created with **Astro**, **Astro DB** and **Better Auth**, connected to a **Turso Database**. Emails powered by **Resend**.
 
-This took me a bit of time to figure out, so I thought the instructions could be useful.
-
 I've kept most auth logic client side after reading this recommendation: https://github.com/better-auth/better-auth/pull/2987/files?short_path=526860b#diff-526860b5c0d9d9e59a79a28fcead2aac495dddaff1d4ce4f2867372c25410653
 
 ---
 
 ## Getting started
+
+### Prerequisites
+
+- Node.js 18+
+- Turso account
+- Resend account (for email sending)
+
+### Setup
 
 Follow these steps to set up and run the application locally:
 
@@ -28,24 +34,12 @@ cd astro-db-better-auth
 npm install
 ```
 
-3. **Create environment variables**
+3. **Environment setup**
 
-```sh
-# Database
-ASTRO_DB_REMOTE_URL=libsql://example.turso.io
-ASTRO_DB_APP_TOKEN=insert-your-token-here
+Copy the `.env.example` file to `.env` and fill in the values.
 
-# Better Auth
-BETTER_AUTH_SECRET=insert-your-secret-here
-BETTER_AUTH_URL=http://localhost:4321
-
-# GitHub
-GITHUB_CLIENT_ID=insert-your-id-here
-GITHUB_CLIENT_SECRET=insert-your-secret-here
-
-# Resend
-RESEND_API_KEY=insert-your-api-key-here
-RESEND_EMAIL=example@email.com
+```bash
+cp .env.example .env.local
 ```
 
 4. **Start dev server**

@@ -4,6 +4,7 @@ import UpdatePasswordForm from "@/components/UpdatePasswordForm.astro";
 import UpdateProfileForm from "@/components/UpdateProfileForm.astro";
 import DeleteAccountForm from "@/components/DeleteAccountForm.astro";
 import { db, Account as Acc, eq } from "astro:db";
+import { formatDate } from "@/lib/utils";
 
 if (!Astro.locals.session && !Astro.locals.user) {
   return Astro.redirect("/sign-in");
@@ -16,7 +17,16 @@ const provider = await db
   .from(Acc)
   .where(eq(Acc.userId, Astro.locals.user?.id as string));
 
-const pass = String(provider[0].providerId) === "credential" ? true : false;
+const account = await db
+  .select({ updatedAt: Acc.updatedAt })
+  .from(Acc)
+  .where(eq(Acc.userId, Astro.locals.user?.id as string))
+  .then((rows) => rows[0]);
+
+const isCredentials =
+  String(provider[0].providerId) === "credential" ? true : false;
+const userUpdatedAt = formatDate(Astro.locals.user?.updatedAt!);
+const accountUpdatedAt = account ? formatDate(account.updatedAt) : null;
 ---
 
 <BaseLayout>
@@ -34,41 +44,63 @@ const pass = String(provider[0].providerId) === "credential" ? true : false;
       )
     }
 
-    <hr />
+    <div class="card">
+      <header>
+        <h2 class="text-xl font-bold">Profile</h2>
+        <p class="text-xs">
+          Last updated: {userUpdatedAt}
+        </p>
+      </header>
 
-    <UpdateProfileForm />
-
-    <hr />
+      <section>
+        <UpdateProfileForm />
+      </section>
+    </div>
 
     {
-      pass && (
-        <>
-          <UpdatePasswordForm />
-          <hr />
-        </>
+      isCredentials && (
+        <div class="card">
+          <header>
+            <h2 class="text-xl font-bold">Update password</h2>
+            <p class="text-xs">Last updated: {accountUpdatedAt}</p>
+          </header>
+
+          <section>
+            <UpdatePasswordForm />
+          </section>
+        </div>
       )
     }
 
-    <DeleteAccountForm />
+    <div class="card">
+      <header>
+        <h2 class="text-xl font-bold">Danger zone</h2>
+      </header>
+
+      <section>
+        <DeleteAccountForm />
+      </section>
+    </div>
   </div>
 </BaseLayout>
 
 <script>
   import { authClient } from "@/lib/auth-client";
 
-  const session = await authClient.getSession();
-  const userEmail = session.data?.user.email as string;
   const verifyButton =
     document.querySelector<HTMLButtonElement>("#verify-email");
 
   verifyButton?.addEventListener("click", async (e: MouseEvent) => {
     e.preventDefault();
 
+    const session = await authClient.getSession();
+    const userEmail = session.data?.user.email as string;
+
     try {
       await authClient.sendVerificationEmail(
         {
           email: userEmail,
-          callbackURL: "/dashboard",
+          callbackURL: "/account?email-verified=true",
         },
         {
           onSuccess: (context) => {

@@ -1,44 +1,35 @@
 ---
-import { formatDate } from "@/lib/utils";
 
-const userUpdatedAt = formatDate(Astro.locals.user?.updatedAt!);
 ---
 
-<div class="space-y-6">
-  <div>
-    <h2 class="text-xl font-bold">Profile</h2>
-    <p class="text-muted-foreground">Last updated: {userUpdatedAt}</p>
+<form id="update-profile-form" class="space-y-6">
+  <div class="grid gap-2">
+    <label class="label" for="account-name">Name</label>
+    <input
+      id="account-name"
+      class="input"
+      type="text"
+      name="name"
+      minlength="2"
+      value={Astro.locals.user?.name}
+      required
+    />
   </div>
 
-  <form id="update-profile-form" class="space-y-6">
-    <div class="grid gap-2">
-      <label class="label" for="account-name">Name</label>
-      <input
-        id="account-name"
-        class="input"
-        type="text"
-        name="name"
-        minlength="2"
-        value={Astro.locals.user?.name}
-        required
-      />
-    </div>
+  <div class="grid gap-2">
+    <label class="label" for="account-email">Email</label>
+    <input
+      id="account-email"
+      class="input"
+      type="email"
+      name="email"
+      value={Astro.locals.user?.email}
+      required
+    />
+  </div>
 
-    <div class="grid gap-2">
-      <label class="label" for="account-email">Email</label>
-      <input
-        id="account-email"
-        class="input"
-        type="email"
-        name="email"
-        value={Astro.locals.user?.email}
-        required
-      />
-    </div>
-
-    <button class="btn" type="submit">Update profile</button>
-  </form>
-</div>
+  <button class="btn" type="submit">Update profile</button>
+</form>
 
 <script>
   import { authClient } from "@/lib/auth-client";
@@ -76,14 +67,14 @@ const userUpdatedAt = formatDate(Astro.locals.user?.updatedAt!);
         await authClient.updateUser(
           { name },
           {
-            onSuccess: (context) => {
+            onSuccess: () => {
               document.dispatchEvent(
                 new CustomEvent("basecoat:toast", {
                   detail: {
                     config: {
                       category: "success",
                       title: "Success",
-                      description: context.data.message,
+                      description: "Your password has been updated.",
                       cancel: {
                         label: "Dismiss",
                       },
@@ -103,14 +94,14 @@ const userUpdatedAt = formatDate(Astro.locals.user?.updatedAt!);
         await authClient.changeEmail(
           { newEmail },
           {
-            onSuccess: (context) => {
+            onSuccess: () => {
               document.dispatchEvent(
                 new CustomEvent("basecoat:toast", {
                   detail: {
                     config: {
                       category: "success",
                       title: "Success",
-                      description: context.data.message,
+                      description: "Your email has been updated.",
                       cancel: {
                         label: "Dismiss",
                       },
