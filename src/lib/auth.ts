@@ -16,8 +16,8 @@ export const auth = betterAuth({
   trustedOrigins: [
     import.meta.env.SITE, // This is configured in './astro.config.mjs'
     import.meta.env.VERCEL_URL, // Vercel: https://vercel.com/docs/environment-variables/system-environment-variables#VERCEL_URL
-    import.meta.env.DEPLOY_URL, // Netlify: https://docs.netlify.com/build/configure-builds/environment-variables/#deploy-urls-and-metadata
-    import.meta.env.CF_PAGES_URL, // Cloudflare: https://developers.cloudflare.com/pages/configuration/build-configuration/#environment-variables
+    // import.meta.env.DEPLOY_URL, // Netlify: https://docs.netlify.com/build/configure-builds/environment-variables/#deploy-urls-and-metadata
+    // import.meta.env.CF_PAGES_URL, // Cloudflare: https://developers.cloudflare.com/pages/configuration/build-configuration/#environment-variables
   ],
   emailAndPassword: {
     enabled: true,
