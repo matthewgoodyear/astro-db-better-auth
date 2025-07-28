@@ -86,7 +86,7 @@ npm install better-auth
 Generate a secret key.
 
 ```
-BETTER_AUTH_SECRET=O814CrLNeZJn2FnRC8rTsUvQK0S77bui
+BETTER_AUTH_SECRET=your-secret-here
 ```
 
 #### Create the schema
@@ -229,7 +229,7 @@ Populate the .env file with the info like so:
 
 ```
 ASTRO_DB_REMOTE_URL=libsql://insert-your-url-here.turso.io
-ASTRO_DB_APP_TOKEN=insert-your-token-here
+ASTRO_DB_APP_TOKEN=your-token-here
 ```
 
 Push the database schema to Turso.
