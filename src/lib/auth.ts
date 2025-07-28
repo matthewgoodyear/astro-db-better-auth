@@ -15,8 +15,8 @@ export const auth = betterAuth({
   }),
   trustedOrigins: [
     import.meta.env.SITE, // This is configured in './astro.config.mjs'
-    import.meta.env.VERCEL_URL, // Vercel preview deployments
-    import.meta.env.DEPLOY_URL, // Netlify preview deployments
+    import.meta.env.VERCEL_URL, // Vercel deployments
+    import.meta.env.DEPLOY_URL, // Netlify deployments
   ],
   emailAndPassword: {
     enabled: true,
@@ -43,8 +43,8 @@ export const auth = betterAuth({
   },
   socialProviders: {
     github: {
-      clientId: import.meta.env.GITHUB_CLIENT_ID as string,
-      clientSecret: import.meta.env.GITHUB_CLIENT_SECRET as string,
+      clientId: import.meta.env.GITHUB_CLIENT_ID,
+      clientSecret: import.meta.env.GITHUB_CLIENT_SECRET,
     },
   },
   user: {

@@ -38,8 +38,8 @@ npm install
 
 Copy the `.env.example` file to `.env` and fill in the values.
 
-```bash
-cp .env.example .env.local
+```sh
+cp .env.example .env
 ```
 
 4. **Start dev server**
@@ -83,11 +83,10 @@ npm install better-auth
 
 #### Set environment variables
 
-Generate a secret key and set the base url.
+Generate a secret key.
 
-```sh
+```
 BETTER_AUTH_SECRET=O814CrLNeZJn2FnRC8rTsUvQK0S77bui
-BETTER_AUTH_URL=http://localhost:4321
 ```
 
 #### Create the schema
@@ -98,7 +97,7 @@ We then need to create the schema here to match the schema that Better Auth is e
 
 Create a file named `auth.ts` in the `lib/` folder. This is the bit that tripped me up for a while, but using the Drizzle Adapter and passing our database schema into this seemed to do the trick.
 
-```sh
+```js
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db, Account, Session, User, Verification } from "astro:db";
@@ -123,7 +122,7 @@ export const auth = betterAuth({
 
 Create an API route here `pages/api/auth/[...all].ts`
 
-```sh
+```ts
 import { auth } from "../../../lib/auth";
 import type { APIRoute } from "astro";
 
@@ -136,19 +135,17 @@ export const ALL: APIRoute = async (ctx) => {
 
 Create the auth client in `lib/auth-client.ts`
 
-```sh
+```ts
 import { createAuthClient } from "better-auth/client";
 
-export const authClient = createAuthClient({
-  baseURL: import.meta.env.BETTER_AUTH_URL,
-});
+export const authClient = createAuthClient();
 ```
 
 #### Types
 
 Set up type definitions for `user` and `session` objects in the `/src/env.d.ts` file.
 
-```sh
+```ts
 /// <reference path="../.astro/types.d.ts" />
 
 declare namespace App {
@@ -163,7 +160,7 @@ declare namespace App {
 
 Create a file here `src/middleware/index.ts` with the following code:
 
-```sh
+```js
 import { auth } from "@/lib/auth";
 import { defineMiddleware } from "astro:middleware";
 
@@ -178,6 +175,19 @@ export const onRequest = defineMiddleware(async (context, next) => {
     context.locals.session = isAuthed.session;
   }
   return next();
+});
+```
+
+#### Deployments
+
+To get preview deployments to work, you need to add the URL to the list of trusted origins in the Better Auth config `lib/auth.ts`. This can be done with environment variables exposed by your platform of choice.
+
+```js
+export const auth = betterAuth({
+  trustedOrigins: [
+    import.meta.env.VERCEL_URL, // Vercel deployments
+    import.meta.env.DEPLOY_URL, // Netlify deployments
+  ],
 });
 ```
 
@@ -217,7 +227,7 @@ turso db tokens create [your-db-name]
 
 Populate the .env file with the info like so:
 
-```sh
+```
 ASTRO_DB_REMOTE_URL=libsql://insert-your-url-here.turso.io
 ASTRO_DB_APP_TOKEN=insert-your-token-here
 ```
@@ -230,7 +240,7 @@ astro db push --remote
 
 Update the build command and create a new dev command that's able to use the production database.
 
-```sh
+```json
 {
   "scripts": {
     "dev-remote": "astro dev --remote",
@@ -238,9 +248,3 @@ Update the build command and create a new dev command that's able to use the pro
   }
 }
 ```
-
-## Conclusion
-
-We're now now ready to use Better Auth in our Astro app.
-
-This repo contains a basic example of how to use it.
