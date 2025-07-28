@@ -13,7 +13,11 @@ export const auth = betterAuth({
       verification: Verification,
     },
   }),
-  trustedOrigins: [import.meta.env.SITE, import.meta.env.VERCEL_URL],
+  trustedOrigins: [
+    import.meta.env.SITE, // This is configured in './astro.config.mjs'
+    import.meta.env.VERCEL_URL, // Vercel preview deployments
+    import.meta.env.DEPLOY_URL, // Netlify preview deployments
+  ],
   emailAndPassword: {
     enabled: true,
     autoSignIn: false,
