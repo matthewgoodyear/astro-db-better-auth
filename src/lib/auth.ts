@@ -13,7 +13,7 @@ export const auth = betterAuth({
       verification: Verification,
     },
   }),
-  trustedOrigins: [import.meta.env.SITE],
+  trustedOrigins: [import.meta.env.SITE, import.meta.env.VERCEL_URL],
   emailAndPassword: {
     enabled: true,
     autoSignIn: false,
